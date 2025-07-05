@@ -24,6 +24,8 @@ El repositorio posee la carpeta `src`, en la cual se encuentra el paquete `follo
 
 - El nodo **`follow_gap_f1tenth`** es el nodo de control autónomo que recibe datos del LIDAR (mediante el *topic* `/scan`) del vehículo para decidir la dirección y velocidad en la que el vehículo debe avanzar, y publica esta información en el *topic* `/drive`.
 
+Adicionalmente el repositorio tambien tiene el paquete `f1tenth_gym_ros` el cual contiene la carpeta `maps` cargada con varios mapas para el simulador, el mapa empleado en este proyecto es el llamado `BrandsHatch_map`, tambien se emplea el mapa llamado `BrandsHatch_map_obs` el cual es la verción con obstaculos.
+
 ---
 
 ### **Estructura del código del controlador**
