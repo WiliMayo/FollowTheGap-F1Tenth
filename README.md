@@ -1,37 +1,78 @@
-# Control Reactivo Follow the Gap para simulador F1Tenth probado en la pista Brands Hatch
+# 🏎️ Control Reactivo "Follow the Gap" para F1Tenth
 
-Proyecto práctico basado en el simulador oficial de F1Tenth en el que se implementa un controlador reactivo "Follow the Gap", en forma de un nodo de ROS 2 para recorrer la pista **Brands Hatch** con el objetivo de completar 10 vueltas en el menor tiempo posible **sin colisiones**. Para este fin, también se implementará un nodo con función de cronómetro y contador de vueltas.
-
----
-
-### **Descripción del enfoque utilizado**
-
-El enfoque "Follow the Gap" es una técnica utilizada en la conducción autónoma para evitar obstáculos de manera reactiva. Su funcionamiento en este proyecto es el siguiente:
-
-- **Detección del entorno**: El vehículo utiliza un LIDAR para identificar las paredes y obstáculos en su trayectoria en tiempo real.  
-- **Mapeo de espacios libres ("gaps")**: Analiza la información del LIDAR para reconocer los huecos o espacios entre obstáculos donde el vehículo podría pasar de manera segura.  
-- **Selección del mejor "gap"**: Elige el espacio más amplio y seguro; en este caso, es el *gap* que posee la mayor distancia hasta el vehículo.  
-- **Ajuste de trayectoria**: Dirige el vehículo hacia el centro del *gap* más lejano.  
-- **Control de velocidad**: El vehículo se mueve a una velocidad en función de la distancia al *gap*, hasta una velocidad máxima. Además, posee un parámetro de velocidad mínima.
+Un proyecto de **ROS 2** que implementa un controlador autónomo **Follow the Gap** para el simulador **F1Tenth**, probado en la pista **Brands Hatch**.
 
 ---
 
-### **Contenido del repositorio**
+## 🎯 Objetivo del Proyecto
 
-El repositorio posee la carpeta `src`, en la cual se encuentra el paquete `follow_the_gap`, que contiene los dos nodos utilizados en este proyecto.
+Este proyecto implementa un **controlador reactivo "Follow the Gap"** en un nodo de **ROS 2** para el simulador oficial de **F1Tenth**.  
+El objetivo es recorrer la pista *Brands Hatch* y completar **10 vueltas** en el menor tiempo posible **sin colisiones**.
 
-- El nodo **`lap_timer`** es el encargado de comenzar a medir el tiempo de cada vuelta desde que el vehículo empieza a moverse (por eso es importante ejecutarlo primero). Cuando el vehículo vuelve a pasar por la línea de inicio, este nodo publica el número de vuelta y el tiempo de vuelta.
+El proyecto incluye dos nodos principales:
 
-- El nodo **`follow_gap_f1tenth`** es el nodo de control autónomo que recibe datos del LIDAR (mediante el *topic* `/scan`) del vehículo para decidir la dirección y velocidad en la que el vehículo debe avanzar, y publica esta información en el *topic* `/drive`.
-
-Adicionalmente el repositorio tambien tiene el paquete `f1tenth_gym_ros` el cual contiene la carpeta `maps` cargada con varios mapas para el simulador, el mapa empleado en este proyecto es el llamado `BrandsHatch_map`, tambien se emplea el mapa llamado `BrandsHatch_map_obs` el cual es la verción con obstaculos.
+- **`follow_gap_f1tenth`** → Nodo de control autónomo.  
+- **`lap_timer`** → Cronómetro y contador de vueltas.
 
 ---
 
-### **Estructura del código del controlador**
+## 💡 Enfoque Utilizado: Follow the Gap
 
-#### - Suscripción a `/scan`
-```py
+El enfoque **Follow the Gap** es una técnica reactiva de evasión de obstáculos basada en los datos del **LiDAR**.  
+Su funcionamiento en este proyecto es el siguiente:
+
+1. 🛰️ **Detección del entorno:** El LIDAR identifica paredes y obstáculos en tiempo real.  
+2. 🗺️ **Mapeo de espacios (Gaps):** Analiza los datos del LIDAR para encontrar huecos seguros por donde pasar.  
+3. 🏆 **Selección del mejor “Gap”:** Elige el espacio más amplio y seguro (el gap con la mayor distancia).  
+4. 🧭 **Ajuste de trayectoria:** Dirige el vehículo hacia el centro del gap más lejano.  
+5. 🏎️ **Control de velocidad:** Ajusta la velocidad en función de la distancia al objetivo, respetando un mínimo y un máximo.
+
+---
+
+## 🎥 Demostración
+
+> 📝 **Nota:** Crea una carpeta llamada `img/` en la raíz de tu repositorio y añade un GIF con el nombre `demo.gif`.
+
+![Demostración del proyecto](img/demo.gif)
+
+---
+
+## 📂 Contenido del Repositorio
+
+```
+F1Tenth-Repository/
+├── src/
+│   ├── follow_the_gap/
+│   │   ├── follow_gap_f1tenth/     # Nodo de control reactivo
+│   │   ├── lap_timer/              # Nodo de cronómetro y contador de vueltas
+│   │   └── ...
+│   └── f1tenth_gym_ros/            # Paquete del simulador
+│       ├── maps/
+│       │   ├── BrandsHatch_map
+│       │   └── BrandsHatch_map_obs
+│       └── ...
+└── ...
+```
+
+### 📦 Descripción de los paquetes
+
+- **`follow_the_gap`**  
+  Contiene los nodos desarrollados para el control autónomo y el cronómetro.  
+  - `lap_timer`: Mide el tiempo e informa el número de vueltas (debe ejecutarse primero).  
+  - `follow_gap_f1tenth`: Nodo principal que recibe datos de `/scan` (LIDAR) y publica en `/drive`.
+
+- **`f1tenth_gym_ros`**  
+  Contiene el simulador y los mapas del entorno.  
+  - Mapa base: `BrandsHatch_map`  
+  - Mapa con obstáculos: `BrandsHatch_map_obs`
+
+---
+
+## ⚙️ Estructura del Controlador (`follow_gap_f1tenth`)
+
+### 🧩 Suscripción a `/scan`
+
+```python
 self.subscription = self.create_subscription(
     LaserScan,
     '/scan',
@@ -40,8 +81,9 @@ self.subscription = self.create_subscription(
 )
 ```
 
-#### - Publicación en `/drive`
-```py
+### 🚗 Publicación en `/drive`
+
+```python
 self.publisher = self.create_publisher(
     AckermannDriveStamped,
     '/drive',
@@ -49,30 +91,39 @@ self.publisher = self.create_publisher(
 )
 ```
 
-#### - Parámetros del controlador  
-*(Se recomienda bajar `max_speed` a 5 para pistas con obstáculos)*
-```py
+### ⚙️ Parámetros del Controlador
+
+> 💡 Para `BrandsHatch_map_obs` se recomienda reducir `max_speed` a `5.0`.
+
+```python
 self.min_distance = 2.2
 self.window_size = 5
-self.max_steering_angle = 0.4189  # ~24 grados
+self.max_steering_angle = 0.4189  # ≈ 24 grados
 self.max_speed = 11.0
 self.min_speed = 0.5
 self.safe_distance = 10.0
 ```
 
-#### - Función para leer los datos de `/scan`, analizarlos y publicar resultados en `/drive`
-```py
+---
+
+## 🧠 Lógica Principal
+
+### `lidar_callback(msg: LaserScan)`
+
+Procesa los datos del LiDAR y publica el comando de control:
+
+```python
 def lidar_callback(self, msg: LaserScan):
     ranges = np.array(msg.ranges)
 
-    # Reemplazar infinitos por valor máximo
+    # Reemplazar infinitos y recortar valores
     ranges = np.where(np.isinf(ranges), msg.range_max, ranges)
     ranges = np.clip(ranges, 0, msg.range_max)
 
-    # Suavizado
+    # Suavizado de datos
     smoothed = np.convolve(ranges, np.ones(self.window_size)/self.window_size, mode='same')
 
-    # Eliminar obstáculos cercanos
+    # Eliminar obstáculos cercanos (Safety Bubble)
     cleaned = np.copy(smoothed)
     cleaned[cleaned < self.min_distance] = 0.0
 
@@ -83,25 +134,27 @@ def lidar_callback(self, msg: LaserScan):
         self.get_logger().warn("No se detectó un gap válido.")
         return
 
-    # Índice del centro del gap
+    # Calcular ángulo y velocidad
     target_idx = (gap_start + gap_end) // 2
     target_angle = msg.angle_min + target_idx * msg.angle_increment
-
-    # Limitar dirección
     steering_angle = np.clip(target_angle, -self.max_steering_angle, self.max_steering_angle)
 
-    # Velocidad basada en distancia hacia el objetivo
     target_distance = cleaned[target_idx]
     distance_ratio = np.clip(target_distance / self.safe_distance, 0.0, 1.0)
-
     speed = self.min_speed + (self.max_speed - self.min_speed) * distance_ratio
     speed = np.clip(speed, self.min_speed, self.max_speed)
 
+    # Publicar comando
     self.publish_drive_command(speed, steering_angle)
 ```
 
-#### - Función para encontrar el *gap* más lejano
-```py
+---
+
+### `find_largest_gap(data)`
+
+Encuentra el inicio y el fin del gap más amplio:
+
+```python
 def find_largest_gap(self, data):
     max_len = 0
     max_start = 0
@@ -130,8 +183,13 @@ def find_largest_gap(self, data):
     return max_start, max_end
 ```
 
-#### - Función para publicar en `/drive` (usada por `lidar_callback`)
-```py
+---
+
+### `publish_drive_command(speed, steering_angle)`
+
+Publica el mensaje de control:
+
+```python
 def publish_drive_command(self, speed, steering_angle):
     drive_msg = AckermannDriveStamped()
     drive_msg.drive.speed = speed
@@ -141,29 +199,33 @@ def publish_drive_command(self, speed, steering_angle):
 
 ---
 
-## Instrucciones de ejecución e instalación del simulador, ROS 2 y los nodos
+## 🚀 Instalación y Ejecución
 
-### Instalación de ROS 2 Humble
+### 1. Prerrequisitos
 
-- **ROS 2 Humble**: Siga las instrucciones [aquí](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html) para instalarlo.
+- **ROS 2 Humble** → [Instrucciones oficiales de instalación](https://docs.ros.org/en/humble/Installation.html)  
+- **Simulador F1Tenth** → Instálalo desde el repositorio base del simulador.
 
-### Instalación del simulador F1Tenth
+---
 
-- **Simulador F1Tenth**: Siga las instrucciones [aquí](https://github.com/widegonz/F1Tenth-Repository/tree/main) para instalarlo.
+### 2. Configuración del Mapa
 
-### Cambio de mapa a Brands Hatch
+Modifica el archivo `sim.yaml` en:
+```
+F1Tenth-Repository/src/f1tenth_gym_ros/config/sim.yaml
+```
 
-Para cambiar el mapa del simulador a **Brands Hatch**, debemos modificar la ruta del mapa en el archivo `sim.yaml`, utilizando la siguiente ruta:
+Y actualiza la ruta del mapa:
 
-```bash
-/home/your_user/F1Tenth-Repository/src/f1tenth_gym_ros/maps/BrandsHatch
+```yaml
+map_path: /home/your_user/F1Tenth-Repository/src/f1tenth_gym_ros/maps/BrandsHatch_map
 ```
 
 ---
 
-### Para iniciar la simulación
+### 3. Ejecución de la Simulación
 
-Asegúrese de haber hecho `source` a su espacio de trabajo:
+> ⚠️ **Importante:** En cada terminal, haz `source` de tu workspace antes de ejecutar cualquier comando.
 
 ```bash
 cd ~/F1Tenth-Repository
@@ -171,40 +233,21 @@ source /opt/ros/humble/setup.bash
 source install/setup.bash
 ```
 
-**NOTA**: Hacer el `source` en cada nueva terminal que se abra.
+Luego, abre **tres terminales** y ejecuta:
 
----
-
-### 1. Ejecutar el simulador
-
+#### 🧱 Terminal 1: Lanzar el Simulador
 ```bash
 ros2 launch f1tenth_gym_ros gym_bridge_launch.py
 ```
 
-> La primera vez que se ejecuta, el simulador tardará un poco en cargar el modelo del robot. Las siguientes veces será más rápido.
-
----
-
-### 2. Ejecutar el cronómetro y contador de vueltas
-
-En una nueva terminal:
-
+#### ⏱️ Terminal 2: Ejecutar el Cronómetro
 ```bash
-cd ~/F1Tenth-Repository
-source install/setup.bash
 ros2 run follow_the_gap lap_timer
 ```
 
----
-
-### 3. Ejecutar el nodo de control
-
-En otra terminal:
-
+#### 🤖 Terminal 3: Ejecutar el Controlador
 ```bash
-cd ~/F1Tenth-Repository
-source install/setup.bash
 ros2 run follow_the_gap follow_gap_f1tenth
 ```
 
-Al hacer esto, el vehículo virtual comenzará automáticamente a recorrer la pista de manera autónoma, tratando de realizar 10 vueltas en el menor tiempo posible.
+Una vez ejecutado el último comando, el vehículo **comenzará a moverse autónomamente por la pista**.
