@@ -204,7 +204,7 @@ def publish_drive_command(self, speed, steering_angle):
 ### 1. Prerrequisitos
 
 - **ROS 2 Humble** → [Instrucciones oficiales de instalación](https://docs.ros.org/en/humble/Installation.html)  
-- **Simulador F1Tenth** → Instálalo desde el repositorio base del simulador.
+- **Simulador F1Tenth** → Sige las instrucciones [aquí](https://github.com/widegonz/F1Tenth-Repository/tree/main) para instalarlo.
 
 ---
 
