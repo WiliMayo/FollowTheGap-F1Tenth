@@ -31,9 +31,7 @@ Su funcionamiento en este proyecto es el siguiente:
 
 ## 🎥 Demostración
 
-> 📝 **Nota:** Crea una carpeta llamada `img/` en la raíz de tu repositorio y añade un GIF con el nombre `demo.gif`.
-
-![Demostración del proyecto](img/demo.gif)
+![Demostración del proyecto](img/FTG.gif)
 
 ---
 
